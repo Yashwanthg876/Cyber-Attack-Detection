@@ -17,8 +17,11 @@ export const Alerts: React.FC = () => {
 
   const fetchAlerts = async () => {
     try {
-      const response = await apiService.getDashboardData();
-      setAlerts(response.recent_alerts);
+      const response = await apiService.getAlerts({
+        severity: filterLevel !== 'ALL' ? filterLevel : undefined,
+        search: search.trim() ? search.trim() : undefined
+      });
+      setAlerts(response.items || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -28,18 +31,29 @@ export const Alerts: React.FC = () => {
 
   useEffect(() => {
     fetchAlerts();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterLevel]);
 
-  const handleResolve = (id: number) => {
-    setAlerts(prev => 
-      prev.map(a => a.id === id ? { ...a, status: 'Resolved' } : a)
-    );
+  const handleResolve = async (id: number) => {
+    try {
+      await apiService.resolveAlert(id);
+      setAlerts(prev => 
+        prev.map(a => a.id === id ? { ...a, status: 'Resolved' } : a)
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleInvestigate = (id: number) => {
-    setAlerts(prev => 
-      prev.map(a => a.id === id ? { ...a, status: 'Investigating' } : a)
-    );
+  const handleInvestigate = async (id: number) => {
+    try {
+      await apiService.investigateAlert(id);
+      setAlerts(prev => 
+        prev.map(a => a.id === id ? { ...a, status: 'Investigating' } : a)
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   if (loading) {

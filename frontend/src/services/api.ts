@@ -89,6 +89,43 @@ export const apiService = {
     return this.getMockDashboardData();
   },
 
+  // Alerts Ingestion and Resolution
+  async getAlerts(params: { severity?: string; status?: string; search?: string } = {}) {
+    try {
+      const url = new URL(`${BASE_URL}/alerts/`);
+      if (params.severity) url.searchParams.append('severity', params.severity);
+      if (params.status) url.searchParams.append('status', params.status);
+      if (params.search) url.searchParams.append('search', params.search);
+
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('Backend alerts offline, serving mock list.');
+    }
+    return { items: this.getMockDashboardData().recent_alerts, total: 4 };
+  },
+
+  async investigateAlert(alertId: number) {
+    const res = await fetch(`${BASE_URL}/alerts/${alertId}/investigate`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to update alert state.');
+    return res.json();
+  },
+
+  async resolveAlert(alertId: number) {
+    const res = await fetch(`${BASE_URL}/alerts/${alertId}/resolve`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to update alert state.');
+    return res.json();
+  },
+
   // Threat Intel Feeds
   async getThreatIntel() {
     try {

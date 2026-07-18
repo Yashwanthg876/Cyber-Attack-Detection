@@ -8,6 +8,11 @@ from .core.database import engine, get_db
 from .models import Base, SystemLog
 from .api.predict import router as predict_router
 from .api.auth import router as auth_router
+from .api.dashboard import router as dashboard_router
+from .api.threat_intel import router as threat_intel_router
+from .api.explain import router as explain_router
+from .api.alerts import router as alerts_router
+from .api.models import router as models_router
 
 # Initialize database tables
 Base.metadata.create_all(bind=engine)
@@ -21,6 +26,11 @@ app = FastAPI(
 # Include routers
 app.include_router(predict_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(dashboard_router, prefix=settings.API_V1_STR)
+app.include_router(threat_intel_router, prefix=settings.API_V1_STR)
+app.include_router(explain_router, prefix=settings.API_V1_STR)
+app.include_router(alerts_router, prefix=settings.API_V1_STR)
+app.include_router(models_router, prefix=settings.API_V1_STR)
 
 # Set up CORS middleware
 app.add_middleware(
