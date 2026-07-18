@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegis_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - aegis_db_data:/app/data
+    environment:
+      - API_V1_STR=/api/v1
+      - PROJECT_NAME=Aegis AI Cyber Attack Detection & Threat Intel SOC
+      - SECRET_KEY=ae35905d4dfce6d5598fb29be85a9bc6aef88e5d2ff9d7cb83e58309df5072eb
+      - DATABASE_URL=sqlite:////app/data/aegis_soc.db
+      # - VIRUSTOTAL_API_KEY=your_key_here
+      # - ABUSEIPDB_API_KEY=your_key_here
+      # - SHODAN_API_KEY=your_key_here
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aegis_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  aegis_db_data:
+    driver: local
