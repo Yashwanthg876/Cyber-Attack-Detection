@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from .core.config import settings
 from .core.database import engine, get_db
 from .models import Base, SystemLog
+from .api.predict import router as predict_router
+from .api.auth import router as auth_router
 
 # Initialize database tables
 Base.metadata.create_all(bind=engine)
@@ -15,6 +17,10 @@ app = FastAPI(
     description="Real-time SOC platform incorporating weighted machine learning models and deep learning sequence anomalies.",
     version="1.0.0",
 )
+
+# Include routers
+app.include_router(predict_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=settings.API_V1_STR)
 
 # Set up CORS middleware
 app.add_middleware(
