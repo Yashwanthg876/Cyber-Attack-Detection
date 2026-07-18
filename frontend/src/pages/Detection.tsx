@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   UploadCloud, 
   FileText, 
@@ -170,9 +171,13 @@ export const Detection: React.FC = () => {
     };
     return details[attackType] || defaultMitre;
   };
-
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {/* Left Form: Manual Evaluation */}
@@ -481,11 +486,11 @@ export const Detection: React.FC = () => {
               <div className="text-[10px] font-mono text-cyber-muted border-t border-cyber-border/20 pt-4 text-center">
                 All malicious flows triggered active alerts in the incident stream.
               </div>
-            </div>
+          </div>
           )}
 
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
