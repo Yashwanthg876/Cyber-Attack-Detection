@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cyber-bg: #080C14;
+  --color-cyber-card: #0F1626;
+  --color-cyber-border: #1E293B;
+  --color-cyber-input: #131C2E;
+  --color-cyber-text: #F8FAFC;
+  --color-cyber-muted: #94A3B8;
+
+  --color-brand-primary: #3B82F6;
+  --color-brand-glow: #00F0FF;
+  --color-brand-success: #10B981;
+  --color-brand-warning: #F59E0B;
+  --color-brand-danger: #EF4444;
+  --color-brand-purple: #8B5CF6;
+
+  --shadow-glow-blue: 0 0 15px rgba(59, 130, 246, 0.4);
+  --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.4);
+  --shadow-glow-red: 0 0 15px rgba(239, 68, 68, 0.4);
+  --shadow-glow-green: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+body {
+  background-color: var(--color-cyber-bg);
+  color: var(--color-cyber-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Custom cybersecurity scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080C14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
+}
+
+/* Glassmorphism panel utility */
+.cyber-glass {
+  background: rgba(15, 22, 38, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.7);
+}
+
+/* Animated grid lines background */
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(30, 41, 59, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 41, 59, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Glow effects */
+.glow-blue-hover:hover {
+  box-shadow: var(--shadow-glow-blue);
+  border-color: rgba(59, 130, 246, 0.5);
+  transition: all 0.3s ease;
+}
+
+.glow-cyan-hover:hover {
+  box-shadow: var(--shadow-glow-cyan);
+  border-color: rgba(0, 240, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.glow-red-hover:hover {
+  box-shadow: var(--shadow-glow-red);
+  border-color: rgba(239, 68, 68, 0.5);
+  transition: all 0.3s ease;
+}
