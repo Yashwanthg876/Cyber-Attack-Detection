@@ -80,6 +80,18 @@ def simulate_geo_ip(ip_address: str) -> str:
 # LIVE THREAT INTELLIGENCE API INTEGRATIONS
 # ========================================================================
 
+def query_free_ip_api(target: str) -> dict:
+    """Free public GeoIP lookup via ip-api.com (returns real country, ISP, ASN)."""
+    try:
+        resp = requests.get(f"http://ip-api.com/json/{target}?fields=status,country,countryCode,city,isp,org,as,query", timeout=4)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("status") == "success":
+                return data
+    except Exception:
+        pass
+    return {}
+
 def query_virustotal_api(target: str) -> dict:
     """Live VirusTotal v3 API query."""
     key = settings.VIRUSTOTAL_API_KEY
@@ -181,7 +193,8 @@ def query_alienvault_otx(target: str) -> dict:
         return {"status": "exception", "msg": str(e)}
 
 def lookup_ip_reputation(target: str) -> dict:
-    """Unified Live Threat Intelligence Lookup querying VirusTotal, AbuseIPDB, Shodan, and AlienVault."""
+    """Unified Live Threat Intelligence Lookup querying VirusTotal, AbuseIPDB, Shodan, AlienVault, and GeoIP."""
+    geo_res = query_free_ip_api(target)
     vt_res = query_virustotal_api(target)
     abuse_res = query_abuseipdb_api(target)
     shodan_res = query_shodan_api(target)
@@ -196,7 +209,7 @@ def lookup_ip_reputation(target: str) -> dict:
     if vt_malicious > 0 or abuse_score >= 50:
         reputation = "Malicious"
         score = max(abuse_score, min(99, vt_malicious * 10))
-    elif abuse_score > 0 or vt_res.get("status") == "error":
+    elif abuse_score > 0 or (vt_res.get("status") == "error" and vt_res.get("code") != 404):
         reputation = "Suspicious"
         score = max(abuse_score, 40)
     else:
@@ -204,21 +217,25 @@ def lookup_ip_reputation(target: str) -> dict:
         score = 0
 
     country = (
+        geo_res.get("country") or 
         abuse_res.get("country") or 
         vt_res.get("country") or 
         simulate_geo_ip(target)
     )
 
     asn = (
+        geo_res.get("as") or 
         shodan_res.get("asn") or 
         vt_res.get("as_owner") or 
         (abuse_res.get("isp") if abuse_res.get("isp") else "Standard Telecom Provider")
     )
 
+    isp = geo_res.get("isp") or abuse_res.get("isp") or "Unknown Network Provider"
+
     whois_str = (
         f"NetRange:       {target.split('.')[0] if '.' in target else target}.0.0.0 - {target.split('.')[0] if '.' in target else target}.255.255.255\n"
-        f"ISP/Owner:      {abuse_res.get('isp', 'Unknown ISP')}\n"
-        f"Domain:         {abuse_res.get('domain', 'N/A')}\n"
+        f"ISP/Owner:      {isp}\n"
+        f"Location:       {geo_res.get('city', 'Unknown City')}, {country}\n"
         f"Abuse Reports:  {abuse_res.get('total_reports', 0)} incidents logged in last 90 days\n"
         f"Open Ports:     {', '.join(map(str, shodan_res.get('ports', []))) if shodan_res.get('ports') else 'None detected'}\n"
         f"Vulnerabilities:{', '.join(shodan_res.get('vulns', [])) if shodan_res.get('vulns') else 'No known CVEs'}"
@@ -227,7 +244,7 @@ def lookup_ip_reputation(target: str) -> dict:
     vt_score_str = (
         f"{vt_malicious} / {vt_total} engines flag as malicious"
         if vt_total > 0 else
-        (f"AbuseIPDB Confidence Score: {abuse_score}%" if abuse_res.get("status") == "success" else "Live Threat Feeds Active")
+        (f"AbuseIPDB Confidence Score: {abuse_score}%" if abuse_res.get("status") == "success" else f"GeoIP: {country}")
     )
 
     return {
@@ -236,10 +253,11 @@ def lookup_ip_reputation(target: str) -> dict:
         "score": score,
         "country": country,
         "asn": asn,
-        "isp": abuse_res.get("isp", "N/A"),
+        "isp": isp,
         "whois": whois_str,
         "vt_score": vt_score_str,
         "details": {
+            "geoip": geo_res,
             "virustotal": vt_res,
             "abuseipdb": abuse_res,
             "shodan": shodan_res,
