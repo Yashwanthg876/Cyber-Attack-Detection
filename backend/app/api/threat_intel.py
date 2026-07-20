@@ -42,3 +42,9 @@ def get_threat_intel_summary(db: Session = Depends(get_db)):
         ],
         "known_vectors": known_vectors
     }
+
+@router.get("/lookup")
+def lookup_target(target: str):
+    """Queries live external threat intelligence APIs (VirusTotal, AbuseIPDB, Shodan, AlienVault) for target IP/domain."""
+    from ..services.threat_intel import lookup_ip_reputation
+    return lookup_ip_reputation(target)

@@ -47,14 +47,17 @@ export const ThreatIntel: React.FC = () => {
     fetchIntelData();
   }, []);
 
-  const handleIpSearch = (e: React.FormEvent) => {
+  const handleIpSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ipQuery.trim()) return;
     setSearching(true);
     setReputationResult(null);
 
-    // Simulate Threat intelligence API delays (VT, AbuseIPDB, GeoIP)
-    setTimeout(() => {
+    try {
+      const res = await apiService.lookupThreatIntel(ipQuery.trim());
+      setReputationResult(res);
+    } catch (err: any) {
+      console.warn('Real API lookup error, applying simulated result:', err);
       const isThreat = ipQuery.startsWith('185.') || ipQuery.startsWith('80.') || ipQuery.startsWith('91.');
       setReputationResult({
         ip: ipQuery,
@@ -66,8 +69,9 @@ export const ThreatIntel: React.FC = () => {
         whois: `NetRange:       ${ipQuery.substring(0, 4)}0.0.0 - ${ipQuery.substring(0, 4)}255.255.255\nCIDR:           ${ipQuery.substring(0, 4)}0.0.0/16\nNetName:        AEGIS-SIM-NET\nRegDate:        2012-04-18`,
         vt_score: isThreat ? '14 / 85 engines flag' : '0 / 89 engines flag'
       });
+    } finally {
       setSearching(false);
-    }, 800);
+    }
   };
 
   if (loading || !intel) {

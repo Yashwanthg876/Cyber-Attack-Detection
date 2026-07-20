@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     RAW_DATA_DIR: str = os.path.join(DATA_DIR, "raw")
     PROCESSED_DATA_DIR: str = os.path.join(DATA_DIR, "processed")
 
+    # Threat Intelligence API Keys
+    VIRUSTOTAL_API_KEY: str = os.getenv("VIRUSTOTAL_API_KEY", "")
+    ABUSEIPDB_API_KEY: str = os.getenv("ABUSEIPDB_API_KEY", "")
+    SHODAN_API_KEY: str = os.getenv("SHODAN_API_KEY", "")
+    ALIENVAULT_API_KEY: str = os.getenv("ALIENVAULT_API_KEY", "")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

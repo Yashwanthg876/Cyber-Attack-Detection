@@ -140,6 +140,18 @@ export const apiService = {
     return this.getMockThreatIntel();
   },
 
+  async lookupThreatIntel(target: string) {
+    const res = await fetch(`${BASE_URL}/threat-intelligence/lookup?target=${encodeURIComponent(target)}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Threat lookup failed.');
+    }
+    return res.json();
+  },
+
   // SHAP Explainer
   async getShapExplanation(predictedClass: string) {
     try {
